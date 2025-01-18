@@ -128,6 +128,7 @@ async def send_classic_promo_handler(bot: Client, message: Message):
             parse_mode=enums.ParseMode.HTML
         )
         await bot.send_message(message.chat.id, "Une erreur s'est produite. Veuillez réessayer plus tard.")
+        
 @Bot.on_callback_query(filters.regex('^send_standard_promo$') & (filters.user(get_admin()) | filters.user(SUDO_USERS)))
 async def send_morden_promo_handler(bot: Client, message: Message):
     b = get_post()

@@ -30,7 +30,7 @@ async def paid_promo_handler(bot: Client, message: Message):
                 await bot.send_message(x.chat_id, f"Échec de l'envoi du message pour {x.channel_name}\nVeuillez republier la promotion pour éviter un bannissement")
                 error_list += f"🆔 ID : {x.channel_id}\n📛 Nom : {x.channel_name}\n👨‍ Admin : @{x.admin_username} \n🔗Lien : {x.invite_link}\n➖➖➖➖➖➖➖➖➖➖➖➖➖➖"
             except Exception as e:
-                await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
+                # await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
                 LOGGER.error(e)
         
         await bot.send_message(message.message.chat.id, f"✅ TERMINÉ", reply_markup=empty_markup())

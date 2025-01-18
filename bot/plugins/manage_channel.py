@@ -35,7 +35,7 @@ async def ban_channel_handler(bot: Client, message: Message):
                 await bot.send_message(message.message.chat.id, "Canal banni", reply_markup=empty_markup())
     except Exception as e:
         LOGGER.error(e)
-        await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
+        # await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
         await bot.send_message(message.from_user.id, "Quelque chose s'est mal passé", reply_markup=empty_markup())
 
 # Commande pour débannir un canal
@@ -53,7 +53,7 @@ async def unban_channel_handler(bot: Client, message: Message):
                 await bot.send_message(message.message.chat.id, "Canal débanni", reply_markup=empty_markup())
     except Exception as e:
         LOGGER.error(e)
-        await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
+        # await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
         await bot.send_message(message.from_user.id, "Quelque chose s'est mal passé", reply_markup=empty_markup())
 
 # Commande pour mettre à jour les abonnés des canaux
@@ -63,12 +63,12 @@ async def update_subs_handler(bot: Client, message: Message):
     LOGGER.info("Mise à jour des abonnés commencée")
     for channel in get_channel():
         try:
-            LOGGER.info(f"Mise à jour des abonnés pour {channel.channel_name}")
-            subs = await bot.get_chat_members_count(channel.channel_id)
-            update_subs(channel.channel_id, subs)
+            LOGGER.info(f"Mise à jour des abonnés pour {channel['channel_name']}")
+            subs = await bot.get_chat_members_count(channel['channel_id'])
+            update_subs(channel['channel_id'], subs)
         except (ChannelPrivate, ChatAdminRequired) as e:
             LOGGER.error(e)
-            await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
+            # await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
             error_list += f"🆔 ID du canal : {channel}\n ❓ {e}"
 
     await bot.send_message(message.message.chat.id, f"<b>Liste des erreurs</b>\n\n{error_list}")
@@ -83,17 +83,17 @@ async def show_channel_handler(bot: Client, message: Message):
         if channel_info.text == '🚫 Annuler':
             await bot.send_message(message.message.chat.id, "Action annulée", reply_markup=empty_markup())
         else:
-            channel = get_channel_by_id(channel_info.forward_from_chat.id)
+            channel =await get_channel_by_id(channel_info.forward_from_chat.id)
             data = f"""
-🆔 ID : {channel.channel_id}
-📛 Nom : {channel.channel_name}
-📄 Description : {channel.description}
-➖ Abonnés : {channel.subscribers}
-👨🏼‍💼 Admin : {channel.admin_username}
-🔗 Lien : {channel.invite_link}
+🆔 ID : {channel['channel_id']}
+📛 Nom : {channel['channel_name']}
+📄 Description : {channel['description']}
+➖ Abonnés : {channel['subscribers']}
+👨🏼‍💼 Admin : {channel['admin_username']}
+🔗 Lien : {channel['invite_link']}
             """
             await bot.send_message(message.from_user.id, data)
     except Exception as e:
         LOGGER.error(e)
-        await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
+        # await bot.send_message(LOG_CHANNEL, f'\n<code>{traceback.format_exc()}</code>\n\nHeure : {time.ctime()} UTC', parse_mode=enums.ParseMode.HTML)
         await bot.send_message(message.from_user.id, "Quelque chose s'est mal passé", reply_markup=empty_markup())

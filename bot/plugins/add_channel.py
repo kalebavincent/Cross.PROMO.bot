@@ -86,21 +86,11 @@ async def add_channel(bot: Client, message: Message):
     except (ChannelPrivate, ChatAdminRequired) as e:
         # Gestion des erreurs si le canal est privé ou si le bot n'est pas administrateur
         LOGGER.error(e)
-        await bot.send_message(
-            LOG_CHANNEL,
-            f'\n<code>{traceback.format_exc()}</code>\n\nTime : {time.ctime()} UTC',
-            parse_mode=enums.ParseMode.HTML
-        )
         await bot.send_message(chat_id, "<b>❌ Le bot n'est pas administrateur</b>", reply_markup=empty_markup())
 
     except Exception as e:
         # Gestion des autres erreurs
         LOGGER.error(e)
-        await bot.send_message(
-            LOG_CHANNEL,
-            f'\n<code>{traceback.format_exc()}</code>\n\nTime : {time.ctime()} UTC',
-            parse_mode=enums.ParseMode.HTML
-        )
         await bot.send_message(chat_id, "<b>❌ Action invalide</b>", reply_markup=empty_markup())
 
 
