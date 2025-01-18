@@ -82,6 +82,7 @@ if user_chat_id:
     add_admin_if_not_exists(user_chat_id)
 
 
+import os
 from flask import Flask
 
 app = Flask(__name__)
@@ -90,6 +91,12 @@ app = Flask(__name__)
 def home():
     return "Hello, Flask!"
 
+@app.route('/health')
+def health_check():
+    return "OK", 200
+
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    port =5000 
+    app.run(host='0.0.0.0', port=port)
+
 
