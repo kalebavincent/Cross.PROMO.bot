@@ -7,7 +7,6 @@ from pyrogram import Client, __version__, enums
 from pyrogram.raw.all import layer
 import os
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from bot.database import session,base
 from pyromod import listen
 from bot import (
     STRING_SESSION,
