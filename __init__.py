@@ -80,3 +80,16 @@ def add_admin_if_not_exists(user_chat_id):
 user_chat_id = SUDO_USERS 
 if user_chat_id:
     add_admin_if_not_exists(user_chat_id)
+
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Hello, Flask!"
+
+if __name__ == "__main__":
+    app.run(debug=True)
+

@@ -46,8 +46,8 @@ class Bot(Client):
         )
         LOGGER.info(f"Python Version: {python_version()}\n")
         LOGGER.info("Bot Started Successfully!\n")
-        await asyncio.sleep(10)
-        await self.send_message(LOG_CHANNEL, "<i>Démarrage du bot...</i>")
+        # await asyncio.sleep(10)
+        # await self.send_message(LOG_CHANNEL, "<i>Démarrage du bot...</i>")
     async def stop(self):
         #LOGGER.info("Closing Database Connection")
         runtime = strftime("%Hh %Mm %Ss", gmtime(time() - UPTIME))
