@@ -1,12 +1,14 @@
-# -*- coding: utf-8 -*-
+#-*-coding : utf-8 -*-
+
 import asyncio
 from platform import python_version
 from time import gmtime, strftime, time
-from pyrogram import Client, __version__, enums, idle
+from pyrogram import Client, __version__, enums
 from pyrogram.raw.all import layer
 import os
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
+from bot.database import session,base
+from pyromod import listen
 from bot import (
     STRING_SESSION,
     API_HASH,
@@ -31,32 +33,35 @@ class Bot(Client):
             workers=WORKERS,
             parse_mode=enums.ParseMode.HTML
         )
-
+        
+        
+    
     async def start(self):
         await super().start() 
         LOGGER.info("Starting bot...")
-
-        me = await self.get_me()  
+        
+        me=await self.get_me()  
         LOGGER.info(
             f"Pyrogram v{__version__} (Layer - {layer}) started on {me.username} [{me.id}]",
         )
         LOGGER.info(f"Python Version: {python_version()}\n")
         LOGGER.info("Bot Started Successfully!\n")
-        
-        await idle()  
-    
+        # await asyncio.sleep(10)
+        # await self.send_message(LOG_CHANNEL, "<i>Starting Bot...</i>")
     async def stop(self):
+        #LOGGER.info("Closing Database Connection")
         runtime = strftime("%Hh %Mm %Ss", gmtime(time() - UPTIME))
         LOGGER.info("Uploading logs before stopping...!\n")
         await self.send_message(
             LOG_CHANNEL,
-            ("Bot arrêté!\n\n"
-            f"Temps d'exécution: {runtime}\n"
-            f"<code>{LOG_DATETIME}</code>")
-        )
-
+                ("Bot Stopped!\n\n"
+                f"Uptime: {runtime}\n"
+                f"<code>{LOG_DATETIME}</code>")
+            ),
+        
         await super().stop()
         LOGGER.info(
-            f"""Bot arrêté [Temps d'exécution: {runtime}s]\n
-        """
+            f"""Bot Stopped [Runtime: {runtime}s]\n
+        """,
         )   
+    
