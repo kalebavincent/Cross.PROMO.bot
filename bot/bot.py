@@ -1,4 +1,4 @@
-#-*-coding : utf-8 -*-
+# -*- coding : utf-8 -*-
 
 import asyncio
 from platform import python_version
@@ -18,7 +18,12 @@ from bot import (
     STRING_SESSION,
     WORKERS,
     UPTIME,
-    BOT_TOKEN)
+    BOT_TOKEN,
+    DATABASE_URI,
+    DATABASENAME# Vous devrez ajouter cette variable dans votre fichier de configuration
+    
+)
+from motor.motor_asyncio import AsyncIOMotorClient  # Importer Motor pour MongoDB
 
 class Bot(Client):
     def __init__(self):
@@ -32,23 +37,27 @@ class Bot(Client):
             workers=WORKERS,
             parse_mode=enums.ParseMode.HTML
         )
-        
-        
-    
+        self.db_client = None  # Client MongoDB
+        self.db = None  # Base de données MongoDB
+
     async def start(self):
-        await super().start() 
+        await super().start()
         LOGGER.info("Starting bot...")
-        
-        me=await self.get_me()  
+
+        # Connexion à MongoDB
+        self.db_client = AsyncIOMotorClient(DATABASE_URI)
+        self.db = self.db_client[DATABASENAME] # Remplacez par le nom de votre base de données
+        LOGGER.info("Connected to MongoDB")
+
+        me = await self.get_me()
         LOGGER.info(
             f"Pyrogram v{__version__} (Layer - {layer}) started on {me.username} [{me.id}]",
         )
         LOGGER.info(f"Python Version: {python_version()}\n")
         LOGGER.info("Bot Started Successfully!\n")
-        # await asyncio.sleep(10)
-        # await self.send_message(LOG_CHANNEL, "<i>Starting Bot...</i>")
+        
     async def stop(self):
-        #LOGGER.info("Closing Database Connection")
+        # LOGGING
         runtime = strftime("%Hh %Mm %Ss", gmtime(time() - UPTIME))
         LOGGER.info("Uploading logs before stopping...!\n")
         await self.send_message(
@@ -58,9 +67,13 @@ class Bot(Client):
                 f"<code>{LOG_DATETIME}</code>")
             ),
         
+        # Fermer la connexion MongoDB proprement
+        if self.db_client:
+            self.db_client.close()
+            LOGGER.info("MongoDB connection closed.")
+
         await super().stop()
         LOGGER.info(
             f"""Bot Stopped [Runtime: {runtime}s]\n
         """,
-        )   
-    
+        )

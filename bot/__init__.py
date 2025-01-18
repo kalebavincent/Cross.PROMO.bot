@@ -43,6 +43,7 @@ SUPPORT_CHANNEL = Config.SUPPORT_CHANNEL
 LOG_CHANNEL = Config.LOG_CHANNEL
 SUDO_USERS = Config.SUDO_USERS
 DATABASE_URI = Config.DATABASE_URI
+DATABASENAME = Config.DATABASENAME
 WORKERS = Config.WORKERS
 BOT_TOKEN = Config.BOT_TOKEN
 PREFIX_HANDLER = Config.PREFIX_HANDLER
@@ -53,7 +54,6 @@ BOT_USERNAME = ""
 BOT_NAME = ""
 BOT_ID = 0
 
-from bot.database import session, base
 from bot.database.models.user_db import add_admin, get_admin
 
 def add_admin_if_not_exists(user_chat_id):
