@@ -9,6 +9,8 @@ from sys import exit as sysexit
 from sys import stdout, version_info
 from time import time
 from traceback import format_exc
+
+from flask import Flask, jsonify
 from bot.config import Config
 import asyncio
 
@@ -82,21 +84,25 @@ if user_chat_id:
     add_admin_if_not_exists(user_chat_id)
 
 
-import os
-from flask import Flask
-
 app = Flask(__name__)
 
 @app.route('/')
-def home():
-    return "Hello, Flask!"
+def index():
+    return "Welcome to the server!"
 
-@app.route('/health')
+@app.route('/health', methods=['GET'])
 def health_check():
-    return "OK", 200
+    """ Endpoint to check if the server is alive. """
+    return jsonify({"status": "ok", "message": "Server is running."}), 200
 
-if __name__ == "__main__":
-    port =5000 
-    app.run(host='0.0.0.0', port=port)
+def run_flask():
+    """ Fonction pour lancer le serveur Flask sur le port 5000. """
+    app.run(host='0.0.0.0', port=5000, debug=False)
+
+# Lancer le serveur Flask dans un thread séparé
+from threading import Thread
+
+flask_thread = Thread(target=run_flask)
+flask_thread.start()
 
 
