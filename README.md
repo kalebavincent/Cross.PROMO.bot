@@ -1,0 +1,1 @@
+# Cross.PROMO.bot
