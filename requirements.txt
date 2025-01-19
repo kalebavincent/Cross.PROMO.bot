@@ -4,6 +4,8 @@ psycopg2-binary
 pyaes
 Pyrogram
 pyromod
+pymongo
+motor
 PySocks
 python-dotenv
 SQLAlchemy
