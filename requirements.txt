@@ -13,4 +13,5 @@ python-dotenv
 aiohttp
 dnspython
 asyncio
+pytz
 
