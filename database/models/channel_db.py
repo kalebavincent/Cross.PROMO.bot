@@ -96,4 +96,4 @@ async def chunck():
         yield channel_ids[i:i + chunk_size]
 
 def get_list_size():
-    return 10
+    return 100
