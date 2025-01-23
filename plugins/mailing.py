@@ -18,7 +18,9 @@ async def mail_handler(bot: Client, message: Message):
         LOGGER.info("Envoi du message annulé")
     else:
         LOGGER.info("Envoi du message commencé")
-        for user in get_all():
+        users = await get_all()
+        
+        for user in users:
             try:
                 await bot.send_message(user, mail_message.text)
                 LOGGER.info(f"Envoi du message à {user}")
