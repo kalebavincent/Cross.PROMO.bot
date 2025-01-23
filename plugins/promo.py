@@ -296,14 +296,15 @@ async def send_button_promo_handler(bot: Client, message):
 
             temp_buttons = []
             for j in i:
-                ch = await get_channel_by_id(j)  
-                user = await get_user_username(ch['chat_id'])
-                channel_count = await get_user_channel_count(ch['chat_id'])
+                ch = await get_channel_by_id(j) 
+                user = await get_user_username(ch['chat_id'])  
+                channel_count = await get_user_channel_count(ch['chat_id'])  
 
                 temp_buttons.append(InlineKeyboardButton(b['emoji'] + ch['channel_name'] + b['emoji'], url=ch['invite_link']))
                 userdata += f'<code>@{user} ({channel_count})</code>\n'
 
                 tgrille = int(get_grid_size())
+
                 if len(temp_buttons) == tgrille:
                     buttons.append(temp_buttons)
                     temp_buttons = []
@@ -317,42 +318,34 @@ async def send_button_promo_handler(bot: Client, message):
             for x in i:
                 chname = await get_channel_by_id(x)
                 try:
-                    chat_member = await bot.get_chat_member(x, "me")
-                    if not chat_member.can_post_messages:
-                        raise ChatWriteForbidden(f"Le bot n'a pas la permission de publier dans {chname['channel_name']}")
-
                     sent_message = await bot.send_photo(
                         chat_id=x,
                         photo='downloads/image.jpg',
                         caption=b['set_caption'],
                         reply_markup=markup
                     )
+                    
                     save_message_ids(x, sent_message.id)
 
                     channl += f"✅ Nom du canal : {chname['channel_name']}\nhttp://t.me/c/{str(x)[3:]}/{sent_message.id}\n{'-'*40}\n\n"
-                except ChatAdminRequired:
-                    error_list += f"⚠️ Le bot n'est pas admin dans {chname['channel_name']}\n"
-                except ChatWriteForbidden:
-                    error_list += f"⚠️ Le bot ne peut pas publier dans {chname['channel_name']}, permissions insuffisantes\n"
-                except ChannelPrivate:
-                    error_list += f"⚠️ Le canal {chname['channel_name']} est privé ou inaccessible\n"
-                except ChatForbidden:
-                    error_list += f"⚠️ Le bot est banni du canal {chname['channel_name']}\n"
-                except UserBannedInChannel:
-                    error_list += f"⚠️ Le bot est banni dans {chname['channel_name']}\n"
-                except PeerIdInvalid:
-                    error_list += f"⚠️ ID de canal invalide pour {chname['channel_name']}\n"
-                except RPCError as e:
-                    error_list += f"⚠️ Erreur RPC: {e}\n"
+
+                except (ChatAdminRequired, ChannelPrivate, ChatWriteForbidden, ChatForbidden):
+                    await bot.send_message(
+                        SUPPORT_GROUP,
+                        f"⚠️ Échec de la publication dans {chname['channel_name']}\nVeuillez vérifier les permissions.",
+                        parse_mode=enums.ParseMode.MARKDOWN
+                    )
+                    error_list += f"🆔 ID : {x['channel_id']}\n📛 Nom : {x['channel_name']}\n👨‍ Admin : @{x['admin_username']}\n🔗 Lien : {x['invite_link']}\n{'➖'*15}\n"
+
                 except Exception as e:
-                    LOGGER.error(f"Erreur lors de l'envoi dans {x}: {e}")
                     await bot.send_message(
                         LOG_CHANNEL,
                         f'<code>{traceback.format_exc()}</code>\n\nTemps : {time.ctime()} UTC',
                         parse_mode=enums.ParseMode.HTML
                     )
+                    LOGGER.error(f"Erreur lors de l'envoi dans {x}: {e}")
 
-            await bot.send_message(SUPPORT_GROUP, f"#PartageRéussi ✅\n\n{channl}" if channl else "**Aucun succès**", parse_mode=enums.ParseMode.MARKDOWN)
+            await bot.send_message(SUPPORT_GROUP, f"#PartageRéussi ✅\n\n{channl}", parse_mode=enums.ParseMode.MARKDOWN)
             await bot.send_message(SUPPORT_GROUP, f"#Échecs ❌\n\n{error_list}" if error_list else "**Aucun échec signalé**")
 
             li += 1
