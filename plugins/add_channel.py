@@ -17,11 +17,26 @@ from database.models.settings_db import get_subcribers_limit
 @Client.on_callback_query(filters.regex('^add_channel$'))
 async def add_channel(bot: Client, message: Message):
     try:
-        channel = await bot.ask(
-            message.message.chat.id,
-            "✅ <b>Faites de ce bot un administrateur et transférez un message depuis le canal</b>",
-            reply_markup=back_markup()
-        )
+        timeout_duration = 60
+
+        try:
+            channel = await bot.ask(
+                message.message.chat.id,
+                "✅ <b>Faites de ce bot un administrateur dans votre canal et envoyez :</b>\n"
+                "1. Un message transféré depuis le canal.\n"
+                "2. Un lien direct (ex : https://t.me/nom_du_canal).\n"
+                "3. Un pseudonyme du canal (ex : @nom_du_canal).\n\n"
+                "⏳ Vous avez 60 secondes pour répondre.",
+                reply_markup=back_markup(),
+                timeout=timeout_duration
+            )
+        except TimeoutError:
+            await bot.send_message(
+                message.message.chat.id,
+                "⏳ <b>Temps écoulé ! Veuillez recommencer la procédure.</b>",
+                reply_markup=empty_markup()
+            )
+            return
 
         if channel.text == '🚫 Cancel':
             await bot.send_message(
@@ -32,20 +47,40 @@ async def add_channel(bot: Client, message: Message):
             return
 
         chat_id = message.from_user.id
-        channel_id = channel.forward_from_chat.id
-        channel_name = channel.forward_from_chat.title
 
-        # Vérification si le canal est banni
+        if channel.forward_from_chat:
+            channel_id = channel.forward_from_chat.id
+            channel_name = channel.forward_from_chat.title
+        elif "t.me/" in channel.text:
+            try:
+                link = channel.text.strip()
+                channel_info = await bot.get_chat(link)
+                channel_id = channel_info.id
+                channel_name = channel_info.title
+            except Exception:
+                await bot.send_message(chat_id, "<b>❌ Lien invalide ou le bot ne peut accéder au canal.</b>", reply_markup=empty_markup())
+                return
+        elif channel.text.startswith('@'):
+            try:
+                username = channel.text.strip()
+                channel_info = await bot.get_chat(username)
+                channel_id = channel_info.id
+                channel_name = channel_info.title
+            except Exception:
+                await bot.send_message(chat_id, "<b>❌ Pseudonyme invalide ou inaccessible.</b>", reply_markup=empty_markup())
+                return
+        else:
+            await bot.send_message(chat_id, "<b>❌ Message transféré, lien ou pseudonyme valide requis.</b>", reply_markup=empty_markup())
+            return
+
         if await is_channel_ban(channel_id):
             await bot.send_message(chat_id, "Aww :( , Ce canal est banni.")
             return
 
-        # Vérification si le canal existe déjà
         if await is_channel_exist(channel_id):
             await bot.send_message(chat_id, "Aww :( , Le canal existe déjà.")
             return
 
-        # Vérification si le bot est administrateur dans le canal
         if not await is_bot_admin(bot, channel_id):
             await bot.send_message(chat_id, "<b>❌ Le bot n'est pas administrateur</b>", reply_markup=empty_markup())
             return
@@ -53,13 +88,24 @@ async def add_channel(bot: Client, message: Message):
         limit = get_subcribers_limit()
         subscribers = await bot.get_chat_members_count(channel_id)
 
-        # Vérification du nombre d'abonnés requis
         if subscribers < limit:
             await bot.send_message(chat_id, f"Vous avez besoin d'au moins {limit} abonnés pour vous inscrire.", reply_markup=empty_markup())
             return
 
-        # Demander la description du canal
-        description = await bot.ask(chat_id, "<b>✅ Envoyez la description (maximum 5 mots et 2 emojis)</b>")
+        try:
+            description = await bot.ask(
+                chat_id,
+                "<b>✅ Envoyez la description (maximum 5 mots et 2 emojis)</b>\n\n⏳ Vous avez 60 secondes pour répondre.",
+                timeout=timeout_duration
+            )
+        except TimeoutError:
+            await bot.send_message(
+                chat_id,
+                "⏳ <b>Temps écoulé pour envoyer la description. Veuillez recommencer la procédure.</b>",
+                reply_markup=empty_markup()
+            )
+            return
+
         admin_username = message.from_user.username
         invite_link = await bot.export_chat_invite_link(channel_id)
 
